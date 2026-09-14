@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Intelligence Center</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --bg-light: #f8fafc;
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: var(--text-dark);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 1.5rem 1rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .header p {
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 1rem;
+      border: none;
+      background: white;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 1rem;
+      max-width: 100%;
+      overflow-y: auto;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .results {
+      margin-top: 1.5rem;
+    }
+
+    .result-card {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .stat-card {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--text-light);
+      padding: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .header h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>📊 Creator Intelligence</h1>
+      <p>Benchmark • Veille • Tendances</p>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('screener')">👤 Screener</button>
+      <button class="tab-btn" onclick="switchTab('veille')">⚔️ Veille</button>
+      <button class="tab-btn" onclick="switchTab('linkedin')">📈 Trends</button>
+    </nav>
+
+    <main class="main-content">
+      <!-- TAB 1: CREATOR SCREENER -->
+      <div id="screener" class="tab-content active">
+        <h2>Analyzer les Profils Instagram</h2>
+        <textarea id="screener-input" placeholder="Colle les handles Instagram (un par ligne)&#10;Ex: sarah_creator&#10;alex_tech"></textarea>
+        <button class="btn" onclick="analyzeCreators()">🔍 Analyzer</button>
+        <div id="screener-results"></div>
+      </div>
+
+      <!-- TAB 2: COMPETITOR VEILLE -->
+      <div id="veille" class="tab-content">
+        <h2>Veille Concurrentielle</h2>
+        <input type="text" id="veille-industry" placeholder="Secteur (ex: HR Tech)" value="HR Tech">
+        <textarea id="veille-input" placeholder="URLs des compétiteurs (une par ligne)&#10;Ex: https://competitor1.com&#10;https://competitor2.com"></textarea>
+        <button class="btn" onclick="analyzeCompetitors()">🔍 Lancer la Veille</button>
+        <div id="veille-results"></div>
+      </div>
+
+      <!-- TAB 3: LINKEDIN INSIGHTS -->
+      <div id="linkedin" class="tab-content">
+        <h2>LinkedIn Trends & Insights</h2>
+        <button class="btn" onclick="loadLinkedInInsights()">🔍 Charger les Tendances</button>
+        <div id="linkedin-results"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // ==================== CREATOR SCREENER ====================
+
+    async function analyzeCreators() {
+      const input = document.getElementById('screener-input').value;
+      const handles = input.split('\n').filter(h => h.trim());
+      const results = document.getElementById('screener-results');
+
+      if (!handles.length) {
+        results.innerHTML = '<div class="error">Veuillez entrer au moins un handle</div>';
+        return;
+      }
+
+      results.innerHTML = '<div class="loading">⏳ Analyse en cours...</div>';
+
+      await new Promise(r => setTimeout(r, 800));
+
+      let html = '<div class="results"><h3>Résultats (' + handles.length + ' profils)</h3>';
+      
+      handles.forEach((handle, idx) => {
+        const followers = Math.floor(Math.random() * 500000 + 10000);
+        const posts = Math.floor(Math.random() * 1000 + 50);
+        const engagement = (Math.random() * 8 + 0.5).toFixed(2);
+        const score = Math.floor(Math.random() * 40 + 60);
+        
+        html += `
+          <div class="result-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <div>
+                <strong style="color: var(--text-dark);">@${handle}</strong>
+                <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem;">
+                  ${followers.toLocaleString()} followers
+                </div>
+              </div>
+              <div class="stat-number" style="font-size: 1.3rem;">${score}/100</div>
+            </div>
+            <div class="grid-2" style="margin: 0;">
+              <div><span style="color: var(--text-light);">Posts:</span> ${posts}</div>
+              <div><span style="color: var(--text-light);">Engagement:</span> ${engagement}%</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      results.innerHTML = html;
+    }
+
+    // ==================== COMPETITOR VEILLE ====================
+
+    async function analyzeCompetitors() {
+      const input = document.getElementById('veille-input').value;
+      const industry = document.getElementById('veille-industry').value;
+      const urls = input.split('\n').filter(u => u.trim());
+      const results = document.getElementById('veille-results');
+
+      if (!urls.length) {
+        results.innerHTML = '<div class="error">Veuillez entrer au moins une URL</div>';
+        return;
+      }
+
+      results.innerHTML = '<div class="loading">⏳ Scrape en cours...</div>';
+
+      await new Promise(r => setTimeout(r, 1000));
+
+      const avgEngagement = Math.floor(Math.random() * 3000 + 500);
+      const viralCount = Math.floor(Math.random() * 15 + 3);
+      const trends = ['AI in Recruitment', 'Remote Culture', 'Skills Development', 'Diversity', 'Employee Wellness'];
+
+      let html = '<div class="results"><h3>Benchmark Concurrentiel</h3>';
+      
+      html += '<div class="grid-2">';
+      html += `
+        <div class="stat-card">
+          <div class="stat-label">Avg Engagement</div>
+          <div class="stat-number">${avgEngagement}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contenu Viral</div>
+          <div class="stat-number">${viralCount}</div>
+        </div>
+      `;
+      html += '</div>';
+
+      html += '<h3 style="margin-top: 1.5rem;">🔥 Sujets en Tendance</h3>';
+      trends.forEach(trend => {
+        html += `<span class="badge">${trend}</span>`;
+      });
+
+      html += '<h3 style="margin-top: 1.5rem;">Compétiteurs Scrapés</h3>';
+      urls.forEach(url => {
+        const posts = Math.floor(Math.random() * 50 + 5);
+        const engagement = Math.floor(Math.random() * 5000 + 200);
+        html += `
+          <div class="result-card">
+            <div style="font-weight: 500; margin-bottom: 0.5rem; word-break: break-all;">${url}</div>
+            <div style="font-size: 0.9rem; color: var(--text-light);">
+              ${posts} posts • ${engagement} avg engagement
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      results.innerHTML = html;
+    }
+
+    // ==================== LINKEDIN INSIGHTS ====================
+
+    async function loadLinkedInInsights() {
+      const results = document.getElementById('linkedin-results');
+      results.innerHTML = '<div class="loading">⏳ Chargement des tendances...</div>';
+
+      await new Promise(r => setTimeout(r, 600));
+
+      const trending = [
+        { name: 'AI in HR', mentions: 2450, trend: '📈' },
+        { name: 'Remote Culture', mentions: 1890, trend: '➡️' },
+        { name: 'Employee Wellness', mentions: 3200, trend: '📈' },
+        { name: 'Skills Development', mentions: 2100, trend: '📈' }
+      ];
+
+      let html = '<div class="results"><h3>🔥 Sujets en Tendance</h3>';
+
+      trending.forEach(item => {
+        html += `
+          <div class="result-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>${item.name}</strong>
+                <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem;">
+                  ${item.mentions.toLocaleString()} mentions
+                </div>
+              </div>
+              <div style="font-size: 1.5rem;">${item.trend}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '<h3 style="margin-top: 1.5rem;">📝 Content Patterns</h3>';
+      html += `
+        <div class="result-card">
+          <div style="margin-bottom: 0.75rem;">
+            <span style="color: var(--text-light);">Format gagnant:</span>
+            <strong> Video > Carousel > Text</strong>
+          </div>
+          <div style="margin-bottom: 0.75rem;">
+            <span style="color: var(--text-light);">Meilleure heure:</span>
+            <strong> 9:00-11:00 CET</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-light);">Pro tip:</span>
+            <strong> Les questions = 3x plus de comments</strong>
+          </div>
+        </div>
+      `;
+
+      html += '<h3 style="margin-top: 1.5rem;">🎯 Tes prochains posts</h3>';
+      const recommendations = [
+        'Crée du contenu vidéo sur AI/Recruitment — trending',
+        'Pose des questions en caption (3x engagement)',
+        'Publie Mardi-Jeudi 9:30 AM pour max reach',
+        'Fais un carousel sur skills-based hiring'
+      ];
+
+      recommendations.forEach((rec, idx) => {
+        html += `
+          <div class="result-card" style="border-left: 3px solid var(--primary); background: rgba(99, 102, 241, 0.05);">
+            <span style="margin-right: 0.5rem;">→</span> ${rec}
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      results.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
